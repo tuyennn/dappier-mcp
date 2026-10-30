@@ -7,10 +7,7 @@ from dappier import Dappier
 from dappier.types import AIRecommendationsResponse
 
 mcp = FastMCP("dappier-mcp")
-api_key = os.getenv("DAPPIER_API_KEY")
-if not api_key:
-    raise ValueError("DAPPIER_API_KEY environment variable is required")
-client = Dappier(api_key=api_key)
+client: Dappier | None = None
 
 
 @mcp.tool()
@@ -168,17 +165,19 @@ def format_results(response: AIRecommendationsResponse) -> str:
 def main():
     """
     Entry point for the Dappier MCP server.
-    
+
     This function initializes the FastMCP server and starts it, so that the server can begin
     processing incoming tool requests.
     """
+    global client
+    api_key = os.getenv("DAPPIER_API_KEY")
+    if not api_key:
+        raise ValueError("DAPPIER_API_KEY environment variable is required")
+    client = Dappier(api_key=api_key)
     try:
         mcp.run()
     except Exception as e:
         print(f"Error starting MCP server: {str(e)}")
 
 if __name__ == "__main__":
-    if not os.getenv("DAPPIER_API_KEY"):
-        raise ValueError("DAPPIER_API_KEY environment variable is required")
-    
     main()
